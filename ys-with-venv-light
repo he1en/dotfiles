@@ -21,44 +21,31 @@ ZSH_THEME_GIT_PROMPT_SUFFIX="$YS_VCS_PROMPT_SUFFIX"
 ZSH_THEME_GIT_PROMPT_DIRTY="$YS_VCS_PROMPT_DIRTY"
 ZSH_THEME_GIT_PROMPT_CLEAN="$YS_VCS_PROMPT_CLEAN"
 
-# HG info
-local hg_info='$(ys_hg_prompt_info)'
-ys_hg_prompt_info() {
-        # make sure this is a hg dir
-        if [ -d '.hg' ]; then
-                echo -n "${YS_VCS_PROMPT_PREFIX1}hg${YS_VCS_PROMPT_PREFIX2}"
-                echo -n $(hg branch 2>/dev/null)
-                if [ -n "$(hg status 2>/dev/null)" ]; then
-                        echo -n "$YS_VCS_PROMPT_DIRTY"
-                else
-                        echo -n "$YS_VCS_PROMPT_CLEAN"
-                fi
-                echo -n "$YS_VCS_PROMPT_SUFFIX"
-        fi
-}
-
 local exit_code="%(?,,C:%{$fg[red]%}%?%{$reset_color%})"
 
-local venv_prompt_info='$(virtualenv_prompt_info)'
+function venv_prompt_info_with_space {
+  if [ ! -z "$(virtualenv_prompt_info)" ]; then
+    echo " $(virtualenv_prompt_info)"
+  fi
+}
 
 # Prompt format:
 #
-# PRIVILEGES USER @ MACHINE in DIRECTORY on git:BRANCH STATE [TIME] C:LAST_EXIT_CODE
+# PRIVILEGES USER @ MACHINE in DIRECTORY [VIRTUAL ENV NAME] on git:BRANCH STATE [TIME] C:LAST_EXIT_CODE
 # $ COMMAND
 #
 # For example:
 #
-# % ys @ ys-mbp in ~/.oh-my-zsh on git:master x [21:47:42] C:0
+# % ys @ ys-mbp in ~/.oh-my-zsh [venv] on git:master x [21:47:42] C:0
 # $
 PROMPT="
 %{$terminfo[bold]$fg[blue]%}#%{$reset_color%} \
 %(#,%{$bg[yellow]%}%{$fg[black]%}%n%{$reset_color%},%{$fg[cyan]%}%n) \
-%{$venv_prompt_info%}\
 %{$reset_color%}@ \
 %{$fg[green]%}%m \
 %{$reset_color%}in \
 %{$terminfo[bold]$fg[magenta]%}%~%{$reset_color%}\
-${hg_info}\
+%{$fg[magenta]\$(venv_prompt_info_with_space)%}\
 ${git_info}\
  \
 %{$reset_color%}[%*] $exit_code
